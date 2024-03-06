@@ -7,6 +7,7 @@ import psycopg2
 from sqlalchemy import make_url
 import os
 import pandas as pd
+import numpy
 
 def setup_embeddings(embedding_model_id):
     "create sentence embeddings"
@@ -89,6 +90,7 @@ def populate_db(
             for col in metadata.columns[metadata.columns != "file_path"]:
                 value = metadata.loc[lambda x: x.file_path == text_i, col].values[0]
                 value = str(value) if pd.isna(value) else value
+                value = int(value) if type(value) == numpy.int64 else value
                 metadata_i[col] = value
                 
         document = Document(
