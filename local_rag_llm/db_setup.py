@@ -8,6 +8,7 @@ from sqlalchemy import make_url
 import os
 import pandas as pd
 import numpy
+from datetime import datetime
 
 def setup_embeddings(embedding_model_id):
     "create sentence embeddings"
@@ -89,6 +90,11 @@ def populate_db(
         if metadata is not None:
             for col in metadata.columns[metadata.columns != "file_path"]:
                 value = metadata.loc[lambda x: x.file_path == text_i, col].values[0]
+                # convert to a date if possible
+                try:
+                    value = round((pd.Timestamp(datetime.strptime(str(value), "%Y-%m-%d")).year) + (pd.Timestamp(datetime.strptime(str(value), "%Y-%m-%d")).dayofyear / 365.25), 4) # give date in year-float
+                except:
+                    pass
                 value = str(value) if pd.isna(value) else value
                 value = int(value) if type(value) == numpy.int64 else value
                 metadata_i[col] = value
