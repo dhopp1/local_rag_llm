@@ -5,13 +5,13 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="local_rag_llm",
-    version="0.0.0",
+    version="0.0.1",
     author="Daniel Hopp",
     author_email="daniel.hopp@un.org",
     description="Create and run a local LLM with RAG",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/dhopp1/nowcast_lstm",
+    url="https://github.com/dhopp1/local_rag_llm",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
