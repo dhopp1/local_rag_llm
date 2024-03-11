@@ -23,7 +23,8 @@ def setup_db(
     port = "5432",
     user = "user1",
     embed_dim = 384,
-    table_name = "texts"
+    table_name = "texts",
+    clear_database = True
 ):
     "create the Postgres table for storing vectors"
     
@@ -37,9 +38,10 @@ def setup_db(
     )
     conn.autocommit = True
 
-    with conn.cursor() as c:
-        c.execute(f"DROP DATABASE IF EXISTS {db_name}")
-        c.execute(f"CREATE DATABASE {db_name}")
+    if clear_database:
+        with conn.cursor() as c:
+            c.execute(f"DROP DATABASE IF EXISTS {db_name}")
+            c.execute(f"CREATE DATABASE {db_name}")
         
     vector_store = PGVectorStore.from_params(
         database = db_name,
