@@ -9,6 +9,7 @@ import os
 import pandas as pd
 import numpy
 from datetime import datetime
+import re
 
 def setup_embeddings(embedding_model_id):
     "create sentence embeddings"
@@ -82,7 +83,7 @@ def populate_db(
     for text_i in text_paths:
         # read the file
         file = open(text_i, "r", encoding = "latin1")
-        stringx = file.read()
+        stringx = file.read().replace("\x00", "\uFFFD")
         file.close()
         
         # generate the document
@@ -134,3 +135,31 @@ def populate_db(
         
     # load nodes into the vectorstore db
     vector_store.add(nodes)
+    
+    
+def convert_csv(csv_path, txt_out_path, sentence_template = ""):
+    """Convert a CSV into a model-interpretable txt file. CSV file must be in long format
+    parameters:
+        :csv_path: str: path of the CSV file you want to convert
+        :txt_out_path: str: where to write the .txt file to
+        :sentence_template: str: The sentence to convert the data to, using {} as placeholders for column names. E.g., 'Indicator was {value} in {country} in {year}' 
+    """
+    stringx = ""
+    data = pd.read_csv(csv_path)
+    
+    # extracting columns in template
+    start_indices = [x.start() for x in re.finditer("{", sentence_template)]
+    end_indices = [x.start() for x in re.finditer("}", sentence_template)]
+    cols = []
+    for i in range(len(start_indices)):
+        cols.append(sentence_template[start_indices[i]+1:end_indices[i]])
+    
+    for i in range(len(data)):
+        tmp_stringx = sentence_template
+        for col in cols:
+            tmp_stringx = tmp_stringx.replace("{" + col + "}", str(data.loc[i, col]))
+            
+        stringx += f"{tmp_stringx}. "
+        
+    with open(txt_out_path, "w") as text_file:
+        text_file.write(stringx)

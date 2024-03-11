@@ -47,6 +47,15 @@ response = model.gen_response(
 
 response["response"] # the text response of the model
 response["supporting_text_01"] # the text of the chunks the response is largely based on plus its metadata
+
+# you can also convert tabular CSVs in long format into LLM readable ones
+from local_rag_llm.db_setup import convert_csv
+
+convert_csv(
+	csv_path = "gdp.csv", # CSV to convert
+	txt_out_path = "texts/gdp.txt", # where to write the text file to, e.g. the same as your 'text_path'
+	sentence_template = "GDP in {country} was {GDP} in {year}" # template sentence, where {col_name} will be replaced with the values in the CSV
+)
 ```
 
 ## non-RAG example
