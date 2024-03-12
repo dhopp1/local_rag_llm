@@ -137,29 +137,68 @@ def populate_db(
     vector_store.add(nodes)
     
     
-def convert_csv(csv_path, txt_out_path, sentence_template = ""):
+def convert_csv(csv_path, txt_out_path, method = "natural_language", metadata_path = "", sentence_template = "", value_col = ""):
     """Convert a CSV into a model-interpretable txt file. CSV file must be in long format
     parameters:
         :csv_path: str: path of the CSV file you want to convert
-        :txt_out_path: str: where to write the .txt file to
-        :sentence_template: str: The sentence to convert the data to, using {} as placeholders for column names. E.g., 'Indicator was {value} in {country} in {year}' 
+        :method: str: one of ['natural_language', 'chunks', 'metadata']. 'natural_language' = one large .txt file with data put into sentences. 'chunks' = many small csvs with one observation per file. 'metadata' = many small .txts with only the value in it, rest of the information in the metadata
+        :txt_out_path: str: where to write the .txt file to. Pass a path not a .txt for 'chunks' and 'metadata' methods
+        :sentence_template: str: the sentence to convert the data to, using {} as placeholders for column names. E.g., 'Indicator was {value} in {country} in {year}' 
+        :value_col: str: if using the 'metadata' method, which column is the value column in the long-formatted data. The rest of the data will go to the metadata
     """
     stringx = ""
     data = pd.read_csv(csv_path)
     
-    # extracting columns in template
-    start_indices = [x.start() for x in re.finditer("{", sentence_template)]
-    end_indices = [x.start() for x in re.finditer("}", sentence_template)]
-    cols = []
-    for i in range(len(start_indices)):
-        cols.append(sentence_template[start_indices[i]+1:end_indices[i]])
-    
-    for i in range(len(data)):
-        tmp_stringx = sentence_template
-        for col in cols:
-            tmp_stringx = tmp_stringx.replace("{" + col + "}", str(data.loc[i, col]))
-            
-        stringx += f"{tmp_stringx}. "
+    if method == "natural_language":
+        # extracting columns in template
+        start_indices = [x.start() for x in re.finditer("{", sentence_template)]
+        end_indices = [x.start() for x in re.finditer("}", sentence_template)]
+        cols = []
+        for i in range(len(start_indices)):
+            cols.append(sentence_template[start_indices[i]+1:end_indices[i]])
         
-    with open(txt_out_path, "w") as text_file:
-        text_file.write(stringx)
+        for i in range(len(data)):
+            tmp_stringx = sentence_template
+            for col in cols:
+                tmp_stringx = tmp_stringx.replace("{" + col + "}", str(data.loc[i, col]))
+                
+            stringx += f"{tmp_stringx}. "
+            
+        with open(txt_out_path, "w") as text_file:
+            text_file.write(stringx)
+    elif method == "chunks":
+        if metadata_path != "":
+            metadata = pd.read_csv(metadata_path)
+        for i in range(len(data)):
+            out_path = f"{txt_out_path}{csv_path.split('/')[-1].replace('.csv', '')}_{str(i+1).zfill(len(str(len(data))))}.csv"
+            tmp = data.iloc[[i]].reset_index(drop = True)
+            tmp.to_csv(out_path, index = False)
+            
+            if metadata_path != "":
+                text_id = len(metadata) + 1
+                metadata.loc[text_id-1, "text_id"] = text_id
+                metadata.loc[text_id-1, "file_path"] = os.path.abspath(out_path)
+        if metadata_path != "":
+            metadata.to_csv(metadata_path, index = False)
+    elif method == "metadata":
+        metadata = pd.read_csv(metadata_path)
+        for col in data.columns[data.columns != value_col]:
+            metadata[col] = ""
+        
+        for i in range(len(data)):
+            out_path = f"{txt_out_path}{csv_path.split('/')[-1].replace('.csv', '')}_{str(i+1).zfill(len(str(len(data))))}.txt"
+            value = data.loc[i, value_col]
+            
+            # updating metadata
+            text_id = len(metadata) + 1
+            metadata.loc[text_id-1, "text_id"] = text_id
+            metadata.loc[text_id-1, "file_path"] = os.path.abspath(out_path)
+            for col in data.columns[data.columns != value_col]:
+                metadata.loc[text_id-1, col] = data.loc[i, col]
+                
+            # writing out text file
+            with open(out_path, "w") as text_file:
+                text_file.write(str(value))
+        metadata["metric"] = value_col        
+        metadata.to_csv(metadata_path, index = False)
+
