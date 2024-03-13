@@ -54,7 +54,7 @@ def setup_db(
         embed_dim = embed_dim
     )
     
-    return vector_store
+    return vector_store, conn, db_name
 
 def populate_db(
     vector_store,

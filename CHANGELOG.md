@@ -1,5 +1,9 @@
 # Change Log
 
+### 0.0.4
+### Added
+* ability to close vector database connection
+
 ## 0.0.3
 ### Added
 * two additional methods for converting CSVs to LLM-readable files
