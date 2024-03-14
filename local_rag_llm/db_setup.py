@@ -61,14 +61,18 @@ def populate_db(
     embed_model,
     text_path = None,
     metadata = None,
+    chunk_overlap = 200,
     chunk_size = 1024,
+    paragraph_separator = "\n\n\n",
     separator = " "
 ):
     "populate the db with nodes from documents"
     
     # ingestion pipeline
     text_parser = SentenceSplitter(
+        chunk_overlap = chunk_overlap,
         chunk_size = chunk_size,
+        paragraph_separator = paragraph_separator,
         separator = separator
     )
 

@@ -1,5 +1,9 @@
 # Change Log
 
+### 0.0.5
+### Added
+* ability to change `chunk_overlap` and `paragraph_separator` parameters in `SentenceSplitter`
+
 ### 0.0.4
 ### Added
 * ability to close vector database connection

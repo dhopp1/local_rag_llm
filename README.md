@@ -5,7 +5,7 @@ Create and run a local LLM with RAG. Adaptation of [this](https://docs.llamainde
 In addition to the libraries in the `requirements.txt`, [Postgres SQL](https://www.postgresql.org/) and [pgvector](https://github.com/pgvector/pgvector) need to be installed on your system.
 
 # Quick usage
-If you want to use RAG, first you have to have Postgres running. E.g., on Mac, `brew services start postgresql` from the command line. You then need to make sure you have created the users/roles you will enter later on in Postgres. E.g., `psql postgres` from the command line, then in SQL:
+If you want to use RAG, first you have to have Postgres running. E.g., on Mac, `brew services start postgresql` from the command line, on Windows `pg_ctl -D "C:\Program Files\PostgreSQL\16\data" start`, depending on where you installed Postgres. You then need to make sure you have created the users/roles you will enter later on in Postgres. E.g., `psql postgres` from the command line (`psql -U postgres` in Windows), then in SQL:
 
 ```SQL
 CREATE ROLE <user> WITH LOGIN PASSWORD '<password>';ALTER ROLE <user> SUPERUSER;
