@@ -33,10 +33,13 @@ model = local_llm.local_llm(
 # setup the Postgres database
 model.setup_db(
 	user = "<user>",
-	password = "<password>"
+	password = "<password>",
+	table_name = "texts",
+	clear_database = False, # whether or not to clear out the vector database
 )
 
 # populate the database with your own documents
+# you can skip this step if you had 'clear_database' = False in the previous step and the vector db has previously been populated
 model.populate_db(
 	chunk_size = 1024 # number of tokens/words to split your documents into
 )

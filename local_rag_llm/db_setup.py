@@ -31,7 +31,7 @@ def setup_db(
 ):
     "create the Postgres table for storing vectors"
 
-    # create the connection
+    # create the default connection
     conn = psycopg2.connect(
         dbname="postgres",
         host=host,
@@ -41,10 +41,32 @@ def setup_db(
     )
     conn.autocommit = True
 
-    if clear_database:
-        with conn.cursor() as c:
+    with conn.cursor() as c:
+        # drop and recreate the database if desired
+        if clear_database:
             c.execute(f"DROP DATABASE IF EXISTS {db_name}")
             c.execute(f"CREATE DATABASE {db_name}")
+        else:
+            # create teh database if it doesn't exist
+            try:
+                c.execute(f"CREATE DATABASE {db_name}")
+            except:
+                pass
+    conn.close()
+
+    # connection to vector database
+    conn = psycopg2.connect(
+        dbname=db_name,
+        host=host,
+        password=password,
+        port=port,
+        user=user,
+    )
+    conn.autocommit = True
+
+    if clear_database:
+        with conn.cursor() as c:
+            c.execute(f"DROP TABLE IF EXISTS data_{table_name}")
 
     vector_store = PGVectorStore.from_params(
         database=db_name,

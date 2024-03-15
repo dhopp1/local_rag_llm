@@ -143,7 +143,7 @@ def gen_response(
                     similarity_top_k=similarity_top_k,
                 )
     else:
-        # non-RAG
+        # RAG
         if text_path is None:
             index = VectorStoreIndex.from_documents(
                 [Document(text=" ", metadata={})], embed_model=embed_model

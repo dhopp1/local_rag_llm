@@ -1,5 +1,9 @@
 # Change Log
 
+### 0.0.7
+### Fixed
+* persistent vector databases
+
 ### 0.0.6
 ### Added
 * ability to have persistent sessions with a chat engine

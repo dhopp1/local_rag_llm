@@ -116,7 +116,14 @@ class local_llm:
             :clear_database: bool: whether or not to clear the existing database
         """
         self.vector_store, self.db_connection, self.db_name = self.db_setup.setup_db(
-            db_name, host, password, port, user, embed_dim, table_name
+            db_name=db_name,
+            host=host,
+            password=password,
+            port=port,
+            user=user,
+            embed_dim=embed_dim,
+            table_name=table_name,
+            clear_database=clear_database,
         )
 
     def close_connection(self):
