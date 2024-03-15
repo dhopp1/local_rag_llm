@@ -1,5 +1,9 @@
 # Change Log
 
+### 0.0.8
+### Fixed
+* separated dropping database and dropping table
+
 ### 0.0.7
 ### Fixed
 * persistent vector databases

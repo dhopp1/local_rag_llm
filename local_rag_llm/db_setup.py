@@ -28,6 +28,7 @@ def setup_db(
     embed_dim=384,
     table_name="texts",
     clear_database=True,
+    clear_table=True,
 ):
     "create the Postgres table for storing vectors"
 
@@ -64,7 +65,7 @@ def setup_db(
     )
     conn.autocommit = True
 
-    if clear_database:
+    if clear_table:
         with conn.cursor() as c:
             c.execute(f"DROP TABLE IF EXISTS data_{table_name}")
 

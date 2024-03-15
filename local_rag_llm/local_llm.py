@@ -101,6 +101,7 @@ class local_llm:
         embed_dim=384,
         table_name="texts",
         clear_database=True,
+        clear_table=True,
     ):
         """Create the Postgres database for storing document vectors. Most of these values can be left as the default, but Postgres must be installed and running on the computer and the provided user role must have been created directly in Postgres via e.g.:
             CREATE ROLE <user> WITH LOGIN PASSWORD '<password>';
@@ -114,6 +115,7 @@ class local_llm:
             :embed_dim: int: number of embedding dimensions
             :table_name: str: name of the table within the db.
             :clear_database: bool: whether or not to clear the existing database
+            :clear_table: bool: whether or not to clear the existing table
         """
         self.vector_store, self.db_connection, self.db_name = self.db_setup.setup_db(
             db_name=db_name,
@@ -124,6 +126,7 @@ class local_llm:
             embed_dim=embed_dim,
             table_name=table_name,
             clear_database=clear_database,
+            clear_table=clear_table,
         )
 
     def close_connection(self):
