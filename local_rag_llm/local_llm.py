@@ -1,5 +1,5 @@
 from importlib import import_module
-from torch import cuda
+import torch
 import os
 import pandas as pd
 
@@ -68,7 +68,13 @@ class local_llm:
         self.memory_limit = memory_limit
         self.system_prompt = system_prompt
 
-        self.device = f"cuda:{cuda.current_device()}" if cuda.is_available() else "cpu"
+        if torch.cuda.is_available():
+            self.device = f"cuda:{torch.cuda.current_device()}"
+        elif torch.backends.mps.is_available() and torch.backends.mps.is_built():
+            self.device = "mps"
+        else:
+            self.device = "cpu"
+        
         self.n_gpu_layers = n_gpu_layers
         self.chat_engine = None
 

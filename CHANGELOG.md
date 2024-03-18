@@ -1,5 +1,9 @@
 # Change Log
 
+### 0.0.9
+### Added
+* `'mps'` device
+
 ### 0.0.8
 ### Fixed
 * separated dropping database and dropping table
