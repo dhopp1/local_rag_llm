@@ -91,6 +91,7 @@ def populate_db(
     chunk_size=1024,
     paragraph_separator="\n\n\n",
     separator=" ",
+    quiet=True,
 ):
     "populate the db with nodes from documents"
 
@@ -110,7 +111,11 @@ def populate_db(
 
     documents = []
 
+    counter = 0
     for text_i in text_paths:
+        counter += 1
+        if not(quiet):
+            print(f"Populating vector database (1/5), reading documents {counter}/{len(text_paths)}")
         # read the file
         file = open(text_i, "r", encoding="latin1")
         stringx = file.read().replace("\x00", "\uFFFD")
@@ -147,14 +152,24 @@ def populate_db(
     # chunking the documents
     text_chunks = []
     doc_idxs = []
+    counter = 0
+    n = len(list(enumerate(documents)))
     for doc_idx, doc in enumerate(documents):
+        counter += 1
+        if not(quiet):
+            print(f"Populating vector database (2/5), chunking documents {counter}/{n}")
         cur_text_chunks = text_parser.split_text(doc.text)
         text_chunks.extend(cur_text_chunks)
         doc_idxs.extend([doc_idx] * len(cur_text_chunks))
 
     # nodes
     nodes = []
+    counter = 0
+    n = len(list(enumerate(text_chunks)))
     for idx, text_chunk in enumerate(text_chunks):
+        counter += 1
+        if not(quiet):
+            print(f"Populating vector database (3/5), adding nodes {counter}/{n}")
         node = TextNode(
             text=text_chunk,
         )
@@ -163,13 +178,19 @@ def populate_db(
         nodes.append(node)
 
     # embeddings from nodes
+    counter = 0
     for node in nodes:
+        counter += 1
+        if not(quiet):
+            print(f"Populating vector database (4/5), adding nodes {counter}/{len(nodes)}")
         node_embedding = embed_model.get_text_embedding(
             node.get_content(metadata_mode="all")
         )
         node.embedding = node_embedding
 
     # load nodes into the vectorstore db
+    if not(quiet):
+        print("Populating vector database (5/5), adding nodes to vector store")
     vector_store.add(nodes)
 
 

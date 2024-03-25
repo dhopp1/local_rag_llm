@@ -150,6 +150,7 @@ AND pid <> pg_backend_pid();"""
         chunk_size=1024,
         paragraph_separator="\n\n\n",
         separator=" ",
+        quiet=True,
     ):
         """Populate the vector database
         parameters:
@@ -157,6 +158,7 @@ AND pid <> pg_backend_pid();"""
             :chunk_size: int: chunk size of the vectors
             :paragraph_separator: str: separator between paragraphs
             :separator: str: token/word separator
+            :quiet: bool: whether or not to print progress
         """
         self.db_setup.populate_db(
             self.vector_store,
@@ -167,6 +169,7 @@ AND pid <> pg_backend_pid();"""
             chunk_size,
             paragraph_separator,
             separator,
+            quiet,
         )
 
     def gen_response(
