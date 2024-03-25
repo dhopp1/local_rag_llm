@@ -107,6 +107,7 @@ def gen_response(
     text_path=None,
     system_prompt="You are a chatbot.",
     memory_limit=2048,
+    streaming=False,
 ):
     "generate a response from the LLM"
     # reset chat engine if required
@@ -130,6 +131,7 @@ def gen_response(
                     chat_mode="context",
                     system_prompt=system_prompt,
                     memory=memory,
+                    streaming=streaming,
                 )
             # RAG
             else:
@@ -140,17 +142,20 @@ def gen_response(
                     verbose=True,
                     llm=llm,
                     chat_mode="context",
+                    system_prompt=system_prompt,
                     similarity_top_k=similarity_top_k,
+                    streaming=streaming,
                 )
     else:
-        # RAG
+        # non-RAG
         if text_path is None:
             index = VectorStoreIndex.from_documents(
                 [Document(text=" ", metadata={})], embed_model=embed_model
             )
             chat_engine = index.as_chat_engine(
-                verbose=True, llm=llm, chat_mode="context", system_prompt=system_prompt
+                verbose=True, llm=llm, chat_mode="context", system_prompt=system_prompt, streaming=streaming,
             )
+        # RAG
         else:
             retriever = VectorDBRetriever(
                 vector_store,
@@ -163,11 +168,18 @@ def gen_response(
 
     # prompt response
     if chat_query == "chat":
-        response = chat_engine.chat(prompt)
+        if streaming:
+            response = chat_engine.stream_chat(prompt)
+        else:
+            response = chat_engine.chat(prompt)
     elif chat_query == "query":
         response = chat_engine.query(prompt)
     final_response = {}
-    final_response["response"] = response.response
+    
+    if streaming:
+        final_response["response"] = response
+    else:
+        final_response["response"] = response.response
 
     # return sources passages
     if text_path is not None:

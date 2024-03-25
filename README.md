@@ -55,6 +55,10 @@ response = model.gen_response(
 response["response"] # the text response of the model
 response["supporting_text_01"] # the text of the chunks the response is largely based on plus its metadata
 
+# if you set streaming=True in .gen_response, response["response"] will be the streaming agent, not the text response
+response["response"].print_response_stream() # to generate it the first time
+response["response"].response # to access it after it's been generated
+
 # you can also convert tabular CSVs in long format into LLM readable ones
 from local_rag_llm.db_setup import convert_csv
 

@@ -178,6 +178,7 @@ AND pid <> pg_backend_pid();"""
         similarity_top_k=4,
         use_chat_engine=False,
         reset_chat_engine=False,
+        streaming=False,
     ):
         """Generate a response to a prompt
         parameters:
@@ -185,6 +186,7 @@ AND pid <> pg_backend_pid();"""
             :similarity_top_k: int: how many supporting chunks to produce alongside the output
             :use_chat_engine: bool: whether or not to use the chat engine, i.e., have persistent chat contexts
             :reset_chat_engine: bool: if a chat engine was previously being used, whether or not to reset its context
+            :streaming: bool: whether or not to produce a streamed chat response
         returns:
             :str | dict: containing the LLM's response and the supporting k documents and their metadata if RAG is used. Any dates in the metadata are returned as year-float (e.g. 2020-01-13 = 2020.036), prompts should take use this format too, e.g., summarize documents before June 2020 should be said summarize documents less than 2020.5
         """
@@ -202,6 +204,7 @@ AND pid <> pg_backend_pid();"""
             text_path=self.text_path,
             system_prompt=self.system_prompt,
             memory_limit=self.memory_limit,
+            streaming=streaming,
         )
 
         self.chat_engine = response["chat_engine"]

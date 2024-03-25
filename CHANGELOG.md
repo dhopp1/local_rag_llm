@@ -1,5 +1,9 @@
 # Change Log
 
+### 0.0.10
+### Added
+* added `streaming` option to `.gen_response`
+
 ### 0.0.9
 ### Added
 * `'mps'` device
