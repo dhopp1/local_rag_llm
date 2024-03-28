@@ -1,5 +1,9 @@
 # Change Log
 
+### 0.0.11
+### Added
+* added automatic handling of CSV data files by converting them to chunked markdown tables
+
 ### 0.0.10
 ### Added
 * added `streaming` option to `.gen_response`

@@ -1,5 +1,5 @@
 # local_llm
-Create and run a local LLM with RAG. Adaptation of [this](https://docs.llamaindex.ai/en/stable/examples/low_level/oss_ingestion_retrieval.html) original article. Works well in conjunction with the [nlp_pipeline](https://github.com/dhopp1/nlp_pipeline) library which you can use to convert your PDFs and websites to the .txt files the library uses.
+Create and run a local LLM with RAG. Adaptation of [this](https://docs.llamaindex.ai/en/stable/examples/low_level/oss_ingestion_retrieval.html) original article. Works well in conjunction with the [nlp_pipeline](https://github.com/dhopp1/nlp_pipeline) library which you can use to convert your PDFs and websites to the .txt files the library uses. It also handles .csv data files.
 
 # Installation
 In addition to the libraries in the `requirements.txt`, [Postgres SQL](https://www.postgresql.org/) and [pgvector](https://github.com/pgvector/pgvector) need to be installed on your system.
@@ -58,15 +58,6 @@ response["supporting_text_01"] # the text of the chunks the response is largely 
 # if you set streaming=True in .gen_response, response["response"] will be the streaming agent, not the text response
 response["response"].print_response_stream() # to generate it the first time
 response["response"].response # to access it after it's been generated
-
-# you can also convert tabular CSVs in long format into LLM readable ones
-from local_rag_llm.db_setup import convert_csv
-
-convert_csv(
-	csv_path = "gdp.csv", # CSV to convert
-	txt_out_path = "texts/gdp.txt", # where to write the text file to, e.g. the same as your 'text_path'
-	sentence_template = "GDP in {country} was {GDP} in {year}" # template sentence, where {col_name} will be replaced with the values in the CSV
-)
 ```
 
 ## non-RAG example
