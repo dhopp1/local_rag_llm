@@ -14,15 +14,16 @@ from llama_index.core.memory import ChatMemoryBuffer
 from llama_index.core import VectorStoreIndex
 
 
-def instantiate_model(
-    text_path,
-    llm_url,
-    llm_path,
-    redownload_llm,
-    temperature,
-    max_new_tokens,
-    context_window,
-    n_gpu_layers,
+def instantiate_llm(
+    llm_url=None,
+    llm_path=None,
+    text_path=None,
+    redownload_llm=False,
+    temperature=None,
+    max_new_tokens=None,
+    context_window=None,
+    verbose=False,
+    n_gpu_layers=0,
 ):
     "download/load a Hugging Face model"
 
@@ -36,24 +37,27 @@ def instantiate_model(
         print("downloading model...")
         urllib.request.urlretrieve(llm_url, llm_path)
 
-    # if no text path given, run vanilla LLM
     try:
-        llm = LlamaCPP(
-            model_url=llm_url,
-            model_path=llm_path,
-            temperature=temperature,
-            max_new_tokens=max_new_tokens,
-            context_window=context_window,
-            generate_kwargs={},
-            model_kwargs={"n_gpu_layers": n_gpu_layers},
-            verbose=True,
-        )
+        kwargs = {
+            k: v for k, v in [
+                ('model_url', llm_url), 
+                ('model_path', llm_path),
+                ('text_path', text_path),
+                ('temperature', temperature),
+                ('max_new_tokens', max_new_tokens),
+                ('context_window', context_window),
+                ('model_kwargs', {"n_gpu_layers": n_gpu_layers}),
+                ('verbose', True)
+            ] 
+            if v is not None
+        }
+        llm = LlamaCPP(**kwargs)
+        llm.verbose = verbose
+        return llm
     except:
         print(
             "model not found, if passing an llm_path, try setting redownload_llm = True"
         )
-
-    return llm
 
 
 class VectorDBRetriever(BaseRetriever):
@@ -100,7 +104,9 @@ def gen_response(
     embed_model=None,
     query_mode="default",
     similarity_top_k=4,
-    max_new_tokens=512,
+    temperature=None,
+    max_new_tokens=None,
+    context_window=None,
     use_chat_engine=False,
     chat_engine=None,
     reset_chat_engine=False,
@@ -115,6 +121,14 @@ def gen_response(
     if use_chat_engine and reset_chat_engine:
         if chat_engine is not None:
             chat_engine.reset()
+            
+    # adjust LLM parameters
+    if temperature is not None:
+        llm.temperature = temperature
+    if max_new_tokens is not None:
+        llm.max_new_tokens = max_new_tokens
+    if context_window is not None:
+        llm.context_window = context_window
 
     # use chat engine
     if use_chat_engine:
