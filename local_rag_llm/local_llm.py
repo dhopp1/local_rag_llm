@@ -8,12 +8,8 @@ class local_llm:
     """Primary class of the library, use and manage the LLM, your RAG documents, and their metadata
     parameters:
         :embedding_model_id: str: ID of the Hugginf Face embedding model
-        :llm_url: str: URL for initial download of the LLM
-        :llm_path: str: path of the LLM locally, if available
-        :redownload_llm: bool: whether or not to force redownloading of the LLM model
         :text_path: str: path of the directory containing the .txt files for RAG, or a list of absolute paths of individual .txt files
         :metadata_path: str: path of the metadata CSV file. The CSV must at least have the two columns, "text_id", and "file_path", containing a unique identifier for the .txt file and the location of the file. Any date columns in the metadata should be in 'YYYY-MM-DD' format
-        :n_gpu_layers: str: number of GPU layers to use, set '0' for cpu
         :hf_token: str: Hugging Face authorization token
         :temperature: float: number between 0 and 1, 0 = more conservative/less creative, 1 = more random/creative
         :max_new_tokens: int: limit of how many tokens to produce for an answer
@@ -25,9 +21,6 @@ class local_llm:
     def __init__(
         self,
         embedding_model_id="sentence-transformers/all-MiniLM-L6-v2",
-        llm_url="https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF/resolve/main/llama-2-7b-chat.Q4_K_M.gguf",
-        llm_path=None,
-        redownload_llm=True,
         text_path=None,
         metadata_path=None,
         hf_token=None,
@@ -42,8 +35,6 @@ class local_llm:
         self.db_setup = import_module("local_rag_llm.db_setup")
 
         self.embedding_model_id = embedding_model_id
-        self.llm_url = llm_url
-        self.llm_path = llm_path
         self.text_path = text_path
         self.metadata_path = metadata_path
         if metadata_path is None:
@@ -74,20 +65,9 @@ class local_llm:
             self.device = "mps"
         else:
             self.device = "cpu"
-        
+
         self.n_gpu_layers = n_gpu_layers
         self.chat_engine = None
-
-        self.llm = self.model_setup.instantiate_model(
-            text_path=self.text_path,
-            llm_url=self.llm_url,
-            llm_path=self.llm_path,
-            redownload_llm=redownload_llm,
-            temperature=self.temperature,
-            max_new_tokens=max_new_tokens,
-            context_window=context_window,
-            n_gpu_layers=self.n_gpu_layers,
-        )
 
         self.embed_model = self.db_setup.setup_embeddings(self.embedding_model_id)
         self.vector_store = None
@@ -175,35 +155,55 @@ AND pid <> pg_backend_pid();"""
     def gen_response(
         self,
         prompt,
+        llm,
         similarity_top_k=4,
+        temperature=None,
+        max_new_tokens=None,
+        context_window=None,
         use_chat_engine=False,
         reset_chat_engine=False,
+        memory_limit=None,
+        system_prompt=None,
         streaming=False,
     ):
         """Generate a response to a prompt
         parameters:
             :prompt: str: what you're asking the LLM
+            :llm: LlamaCPP: which LLM to query
             :similarity_top_k: int: how many supporting chunks to produce alongside the output
+            :temperature: float: number between 0 and 1, 0 = more conservative/less creative, 1 = more random/creative
+            :max_new_tokens: int: limit of how many tokens to produce for an answer
+            :context_window: int: 'working memory' of the LLM, varies by model
             :use_chat_engine: bool: whether or not to use the chat engine, i.e., have persistent chat contexts
             :reset_chat_engine: bool: if a chat engine was previously being used, whether or not to reset its context
+            :memory_limit: int: if using a chat engine, memory limit of the chat engine
+            :system_prompt: str: prompt for initialization of the chatbot
             :streaming: bool: whether or not to produce a streamed chat response
         returns:
             :str | dict: containing the LLM's response and the supporting k documents and their metadata if RAG is used. Any dates in the metadata are returned as year-float (e.g. 2020-01-13 = 2020.036), prompts should take use this format too, e.g., summarize documents before June 2020 should be said summarize documents less than 2020.5
         """
         response = self.model_setup.gen_response(
             prompt=prompt,
-            llm=self.llm,
+            llm=llm,
             vector_store=self.vector_store,
             embed_model=self.embed_model,
             query_mode="default",
             similarity_top_k=similarity_top_k,
-            max_new_tokens=self.max_new_tokens,
+            temperature=self.temperature if temperature is None else temperature,
+            max_new_tokens=self.max_new_tokens
+            if max_new_tokens is None
+            else max_new_tokens,
+            context_window=self.context_window
+            if context_window is None
+            else context_window,
             use_chat_engine=use_chat_engine,
             chat_engine=self.chat_engine,
             reset_chat_engine=reset_chat_engine,
             text_path=self.text_path,
-            system_prompt=self.system_prompt,
-            memory_limit=self.memory_limit,
+            system_prompt=self.system_prompt
+            if system_prompt is None
+            else system_prompt,
+            memory_limit=self.memory_limit if memory_limit is None else memory_limit,
             streaming=streaming,
         )
 

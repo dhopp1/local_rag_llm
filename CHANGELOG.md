@@ -1,5 +1,9 @@
 # Change Log
 
+### 0.0.12
+### Added
+* split the LLM from the vector DB/chat engine model, meaning now you can have multiple separate model objects use the same LLM. Temperature, context window, max new tokens, system prompt, etc. can also all be changed at inference time via the `model.gen_response()` function.
+
 ### 0.0.11
 ### Added
 * added automatic handling of CSV data files by converting them to chunked markdown tables

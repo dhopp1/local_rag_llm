@@ -115,9 +115,11 @@ def populate_db(
     counter = 0
     for text_i in text_paths:
         counter += 1
-        if not(quiet):
-            print(f"Populating vector database (1/5), reading documents {counter}/{len(text_paths)}")
-        
+        if not (quiet):
+            print(
+                f"Populating vector database (1/5), reading documents {counter}/{len(text_paths)}"
+            )
+
         # read the file
         file = open(text_i, "r", encoding="latin1")
         stringx = file.read().replace("\x00", "\uFFFD")
@@ -159,7 +161,7 @@ def populate_db(
     n = len(list(enumerate(documents)))
     for doc_idx, doc in enumerate(documents):
         counter += 1
-        if not(quiet):
+        if not (quiet):
             print(f"Populating vector database (2/5), chunking documents {counter}/{n}")
         # non-CSV
         if doc.metadata["is_csv"] == 0:
@@ -167,12 +169,16 @@ def populate_db(
             text_chunks.extend(cur_text_chunks)
         else:
             data = pd.read_csv(io.StringIO(doc.text), sep=",")
-            markdown = data.to_markdown(floatfmt="", index = False)
-            header = markdown[:markdown.find("\n")*2+2]
-            split = SentenceSplitter(chunk_overlap=int(chunk_size)/6, chunk_size=chunk_size, paragraph_separator="\n").split_text(markdown)
+            markdown = data.to_markdown(floatfmt="", index=False)
+            header = markdown[: markdown.find("\n") * 2 + 2]
+            split = SentenceSplitter(
+                chunk_overlap=int(chunk_size) / 6,
+                chunk_size=chunk_size,
+                paragraph_separator="\n",
+            ).split_text(markdown)
             cur_text_chunks = [header + x if header not in x else x for x in split]
             text_chunks.extend(cur_text_chunks)
-            
+
         doc_idxs.extend([doc_idx] * len(cur_text_chunks))
 
     # nodes
@@ -181,7 +187,7 @@ def populate_db(
     n = len(list(enumerate(text_chunks)))
     for idx, text_chunk in enumerate(text_chunks):
         counter += 1
-        if not(quiet):
+        if not (quiet):
             print(f"Populating vector database (3/5), adding nodes {counter}/{n}")
         node = TextNode(
             text=text_chunk,
@@ -194,14 +200,16 @@ def populate_db(
     counter = 0
     for node in nodes:
         counter += 1
-        if not(quiet):
-            print(f"Populating vector database (4/5), adding nodes {counter}/{len(nodes)}")
+        if not (quiet):
+            print(
+                f"Populating vector database (4/5), adding nodes {counter}/{len(nodes)}"
+            )
         node_embedding = embed_model.get_text_embedding(
             node.get_content(metadata_mode="all")
         )
         node.embedding = node_embedding
 
     # load nodes into the vectorstore db
-    if not(quiet):
+    if not (quiet):
         print("Populating vector database (5/5), adding nodes to vector store")
     vector_store.add(nodes)

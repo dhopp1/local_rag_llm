@@ -16,16 +16,20 @@ Now you are ready to use the library in Python.
 ## RAG example
 
 ```python
-from local_rag_llm import local_llm
+from local_rag_llm.model_setup import instantiate_llm
+from local_rag_llm.local_llm import local_llm
+
+# instantiate the LLM
+llm = instantiate_llm(    llm_url = "https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF/resolve/main/llama-2-7b-chat.Q4_K_M.gguf", # the URL of the particular LLM you want to use. If you have the model locally you don't need to pass this
+	llm_path = llm_path, # path where the local LLM file is stored or will be downloaded to
+	redownload_llm = True, # whether or not to redownload the LLM file
+	n_gpu_layers = 0 # number of GPU layers, 0 for CPU, e.g., 100 if you have a GPU)
 
 # instantiate the model
 model = local_llm.local_llm(
-	llm_url = "https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF/resolve/main/llama-2-7b-chat.Q4_K_M.gguf", # the URL of the particular LLM you want to use. If you have the model locally you don't need to pass this
-	llm_path = llm_path, # path where the local LLM file is stored or will be downloaded to
-	redownload_llm = True, # whether or not to redownload the LLM file
 	text_path = text_path, # either a directory where your .txt files are stored, or a list of absolute paths to the .txt files 
 	metadata_path = "metadata.csv", # optional in case your .txt files have more metadata about them
-	hf_token = None, # hugging face API token. If "HF_AUTH" is in your environment, you don't need to pass	n_gpu_layers = 0, # number of GPU layers, 0 for CPU	temperature = 0.0, # 0-1, 0 = more conservative, 1 = more random/creative	max_new_tokens = 512, # length of new responses, equal to words more or less	context_window = 3900, # working memory of the model in tokens, model-dependent but max is usually around 4k
+	hf_token = None, # hugging face API token. If "HF_AUTH" is in your environment, you don't need to pass	temperature = 0.0, # 0-1, 0 = more conservative, 1 = more random/creative	max_new_tokens = 512, # length of new responses, equal to words more or less	context_window = 3900, # working memory of the model in tokens, model-dependent but max is usually around 4k
 	memory_limit = 2048, # if using a chat engine, memory limit of the chat engine
 	system_prompt = "You are a chatbot." # priming context of the chatbot
 )
@@ -47,6 +51,7 @@ model.populate_db(
 # get a response from the model
 response = model.gen_response(
 	prompt = "prompt",
+	llm = llm,
 	similarity_top_k = 4, # number of documents/chunks to return/query alongside the prompt
 	use_chat_engine = True, # whether or not to use the chat engine, i.e., have a short-term memory of your chat history
 	reset_chat_engine = False # if using a chat engine, whether or not to reset its memory
@@ -66,19 +71,23 @@ A non-RAG model is simpler to set up. The library will infer that the model is n
 ```python
 from local_rag_llm import local_llm
 
+# instantiate the LLM
+llm = instantiate_llm(    llm_url = "https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF/resolve/main/llama-2-7b-chat.Q4_K_M.gguf", # the URL of the particular LLM you want to use. If you have the model locally you don't need to pass this
+	llm_path = llm_path, # path where the local LLM file is stored or will be downloaded to
+	redownload_llm = True, # whether or not to redownload the LLM file
+	n_gpu_layers = 0 # number of GPU layers, 0 for CPU, e.g., 100 if you have a GPU)
+
 # instantiate the model
 model = local_llm.local_llm(
-	llm_url = "https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF/resolve/main/llama-2-7b-chat.Q4_K_M.gguf",
-	llm_path = llm_path,
-	redownload_llm = True,
-	hf_token = None,	n_gpu_layers = 0,	temperature = 0.0,	max_new_tokens = 512,	context_window = 3900
+	hf_token = None,	temperature = 0.0,	max_new_tokens = 512,	context_window = 3900
 )
 
 # get a response from the model
 response = model.gen_response(
-	prompt = "prompt"
+	prompt = "prompt",
+	llm = llm
 )
 
-response # the text of the model's response
+response["response"] # the text of the model's response
 
 ```

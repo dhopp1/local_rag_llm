@@ -17,7 +17,6 @@ from llama_index.core import VectorStoreIndex
 def instantiate_llm(
     llm_url=None,
     llm_path=None,
-    text_path=None,
     redownload_llm=False,
     temperature=None,
     max_new_tokens=None,
@@ -25,7 +24,18 @@ def instantiate_llm(
     verbose=False,
     n_gpu_layers=0,
 ):
-    "download/load a Hugging Face model"
+    """download/load a Hugging Face model. Temperature, max new tokens, and context window can be left alone and adjusted at inference time in the gen_response() function.
+    parameters:
+        :llm_url: str: URL for initial download of the LLM
+        :llm_path: str: path of the LLM locally, if available
+        :redownload_llm: bool: whether or not to force redownloading of the LLM model
+        :temperature: float: number between 0 and 1, 0 = more conservative/less creative, 1 = more random/creative
+        :max_new_tokens: int: limit of how many tokens to produce for an answer
+        :context_window: int: 'working memory' of the LLM, varies by model
+        :n_gpu_layers: str: number of GPU layers to use, set '0' for cpu
+    returns:
+        :LlamaCPP: LlamaCPP LLM
+    """
 
     # download the hugging face model if it doesn't exist
     if llm_path is None:
@@ -39,20 +49,21 @@ def instantiate_llm(
 
     try:
         kwargs = {
-            k: v for k, v in [
-                ('model_url', llm_url), 
-                ('model_path', llm_path),
-                ('text_path', text_path),
-                ('temperature', temperature),
-                ('max_new_tokens', max_new_tokens),
-                ('context_window', context_window),
-                ('model_kwargs', {"n_gpu_layers": n_gpu_layers}),
-                ('verbose', True)
-            ] 
+            k: v
+            for k, v in [
+                ("model_url", llm_url),
+                ("model_path", llm_path),
+                ("temperature", temperature),
+                ("max_new_tokens", max_new_tokens),
+                ("context_window", context_window),
+                ("model_kwargs", {"n_gpu_layers": n_gpu_layers}),
+                ("verbose", True),
+            ]
             if v is not None
         }
         llm = LlamaCPP(**kwargs)
         llm.verbose = verbose
+        llm.model_kwargs["verbose"] = verbose
         return llm
     except:
         print(
@@ -121,14 +132,21 @@ def gen_response(
     if use_chat_engine and reset_chat_engine:
         if chat_engine is not None:
             chat_engine.reset()
-            
+
     # adjust LLM parameters
-    if temperature is not None:
-        llm.temperature = temperature
-    if max_new_tokens is not None:
-        llm.max_new_tokens = max_new_tokens
-    if context_window is not None:
-        llm.context_window = context_window
+    original_temperature = llm.temperature
+    original_max_tokens = llm.max_new_tokens
+    original_context_window = llm.context_window
+
+    llm.generate_kwargs["temperature"] = (
+        temperature if temperature is not None else original_temperature
+    )
+    llm.generate_kwargs["max_tokens"] = (
+        max_new_tokens if max_new_tokens is not None else original_max_tokens
+    )
+    llm._model.context_params.n_ctx = (
+        context_window if context_window is not None else original_context_window
+    )
 
     # use chat engine
     if use_chat_engine:
@@ -167,7 +185,11 @@ def gen_response(
                 [Document(text=" ", metadata={})], embed_model=embed_model
             )
             chat_engine = index.as_chat_engine(
-                verbose=True, llm=llm, chat_mode="context", system_prompt=system_prompt, streaming=streaming,
+                verbose=True,
+                llm=llm,
+                chat_mode="context",
+                system_prompt=system_prompt,
+                streaming=streaming,
             )
         # RAG
         else:
@@ -189,7 +211,7 @@ def gen_response(
     elif chat_query == "query":
         response = chat_engine.query(prompt)
     final_response = {}
-    
+
     if streaming:
         final_response["response"] = response
     else:
@@ -202,4 +224,10 @@ def gen_response(
             final_response[
                 f"supporting_text_{str(j+1).zfill(3)}"
             ] = f"metadata: {str(response.source_nodes[j].metadata)}| source text: {response.source_nodes[j].get_text()}"
+
+    # adjust LLM parameters back
+    llm.generate_kwargs["temperature"] = original_temperature
+    llm.generate_kwargs["max_tokens"] = original_max_tokens
+    llm._model.context_params.n_ctx = original_context_window
+
     return {"final_response": final_response, "chat_engine": chat_engine}
