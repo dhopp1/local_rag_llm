@@ -150,34 +150,36 @@ def gen_response(
 
     # use chat engine
     if use_chat_engine:
-        memory = ChatMemoryBuffer.from_defaults(token_limit=memory_limit)
         if chat_engine is None:
-            # non-RAG
-            if text_path is None:
-                index = VectorStoreIndex.from_documents(
-                    [Document(text=" ", metadata={})], embed_model=embed_model
-                )
-                chat_engine = index.as_chat_engine(
-                    verbose=True,
-                    llm=llm,
-                    chat_mode="context",
-                    system_prompt=system_prompt,
-                    memory=memory,
-                    streaming=streaming,
-                )
-            # RAG
-            else:
-                index = VectorStoreIndex.from_vector_store(
-                    vector_store, embed_model=embed_model
-                )
-                chat_engine = index.as_chat_engine(
-                    verbose=True,
-                    llm=llm,
-                    chat_mode="context",
-                    system_prompt=system_prompt,
-                    similarity_top_k=similarity_top_k,
-                    streaming=streaming,
-                )
+            memory = ChatMemoryBuffer.from_defaults(token_limit=memory_limit)
+        else:
+            memory = ChatMemoryBuffer.from_defaults(chat_history=chat_engine.chat_history, token_limit=memory_limit)
+        # non-RAG
+        if text_path is None:
+            index = VectorStoreIndex.from_documents(
+                [Document(text=" ", metadata={})], embed_model=embed_model
+            )
+            chat_engine = index.as_chat_engine(
+                verbose=True,
+                llm=llm,
+                chat_mode="context",
+                system_prompt=system_prompt,
+                memory=memory,
+                streaming=streaming,
+            )
+        # RAG
+        else:
+            index = VectorStoreIndex.from_vector_store(
+                vector_store, embed_model=embed_model
+            )
+            chat_engine = index.as_chat_engine(
+                verbose=True,
+                llm=llm,
+                chat_mode="context",
+                system_prompt=system_prompt,
+                similarity_top_k=similarity_top_k,
+                streaming=streaming,
+            )
     else:
         # non-RAG
         if text_path is None:
