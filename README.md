@@ -23,13 +23,14 @@ from local_rag_llm.local_llm import local_llm
 llm = instantiate_llm(    llm_url = "https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF/resolve/main/llama-2-7b-chat.Q4_K_M.gguf", # the URL of the particular LLM you want to use. If you have the model locally you don't need to pass this
 	llm_path = llm_path, # path where the local LLM file is stored or will be downloaded to
 	redownload_llm = True, # whether or not to redownload the LLM file
-	n_gpu_layers = 0 # number of GPU layers, 0 for CPU, e.g., 100 if you have a GPU)
+	n_gpu_layers = 0, # number of GPU layers, 0 for CPU, e.g., 100 if you have a GPU
+	context_window = 3900, # working memory of the model in tokens, model-dependent)
 
 # instantiate the model
 model = local_llm.local_llm(
 	text_path = text_path, # either a directory where your .txt files are stored, or a list of absolute paths to the .txt files 
 	metadata_path = "metadata.csv", # optional in case your .txt files have more metadata about them
-	hf_token = None, # hugging face API token. If "HF_AUTH" is in your environment, you don't need to pass	temperature = 0.0, # 0-1, 0 = more conservative, 1 = more random/creative	max_new_tokens = 512, # length of new responses, equal to words more or less	context_window = 3900, # working memory of the model in tokens, model-dependent but max is usually around 4k
+	hf_token = None, # hugging face API token. If "HF_AUTH" is in your environment, you don't need to pass	temperature = 0.0, # 0-1, 0 = more conservative, 1 = more random/creative	max_new_tokens = 512, # length of new responses, equal to words more or less
 	memory_limit = 2048, # if using a chat engine, memory limit of the chat engine
 	system_prompt = "You are a chatbot." # priming context of the chatbot
 )
@@ -79,7 +80,7 @@ llm = instantiate_llm(    llm_url = "https://huggingface.co/TheBloke/Llama-2-7B
 
 # instantiate the model
 model = local_llm.local_llm(
-	hf_token = None,	temperature = 0.0,	max_new_tokens = 512,	context_window = 3900
+	hf_token = None,	temperature = 0.0,	max_new_tokens = 512,
 )
 
 # get a response from the model

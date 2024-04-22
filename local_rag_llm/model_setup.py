@@ -20,7 +20,7 @@ def instantiate_llm(
     redownload_llm=False,
     temperature=None,
     max_new_tokens=None,
-    context_window=None,
+    context_window=3900,
     verbose=False,
     n_gpu_layers=0,
 ):
@@ -117,7 +117,6 @@ def gen_response(
     similarity_top_k=4,
     temperature=None,
     max_new_tokens=None,
-    context_window=None,
     use_chat_engine=False,
     chat_engine=None,
     reset_chat_engine=False,
@@ -136,16 +135,12 @@ def gen_response(
     # adjust LLM parameters
     original_temperature = llm.temperature
     original_max_tokens = llm.max_new_tokens
-    original_context_window = llm.context_window
 
     llm.generate_kwargs["temperature"] = (
         temperature if temperature is not None else original_temperature
     )
     llm.generate_kwargs["max_tokens"] = (
         max_new_tokens if max_new_tokens is not None else original_max_tokens
-    )
-    llm._model.context_params.n_ctx = (
-        context_window if context_window is not None else original_context_window
     )
 
     # use chat engine
@@ -230,6 +225,5 @@ def gen_response(
     # adjust LLM parameters back
     llm.generate_kwargs["temperature"] = original_temperature
     llm.generate_kwargs["max_tokens"] = original_max_tokens
-    llm._model.context_params.n_ctx = original_context_window
 
     return {"final_response": final_response, "chat_engine": chat_engine}

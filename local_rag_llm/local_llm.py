@@ -13,7 +13,6 @@ class local_llm:
         :hf_token: str: Hugging Face authorization token
         :temperature: float: number between 0 and 1, 0 = more conservative/less creative, 1 = more random/creative
         :max_new_tokens: int: limit of how many tokens to produce for an answer
-        :context_window: int: 'working memory' of the LLM, varies by model
         :memory_limit: int: if using a chat engine, memory limit of the chat engine
         :system_prompt: str: prompt for initialization of the chatbot
     """
@@ -27,7 +26,6 @@ class local_llm:
         n_gpu_layers=0,
         temperature=0.0,
         max_new_tokens=512,
-        context_window=3900,
         memory_limit=2048,
         system_prompt="",
     ):
@@ -55,7 +53,6 @@ class local_llm:
             os.environ["HF_TOKEN"] = hf_token
         self.temperature = temperature
         self.max_new_tokens = max_new_tokens
-        self.context_window = context_window
         self.memory_limit = memory_limit
         self.system_prompt = system_prompt
 
@@ -159,7 +156,6 @@ AND pid <> pg_backend_pid();"""
         similarity_top_k=4,
         temperature=None,
         max_new_tokens=None,
-        context_window=None,
         use_chat_engine=False,
         reset_chat_engine=False,
         memory_limit=None,
@@ -173,7 +169,6 @@ AND pid <> pg_backend_pid();"""
             :similarity_top_k: int: how many supporting chunks to produce alongside the output
             :temperature: float: number between 0 and 1, 0 = more conservative/less creative, 1 = more random/creative
             :max_new_tokens: int: limit of how many tokens to produce for an answer
-            :context_window: int: 'working memory' of the LLM, varies by model
             :use_chat_engine: bool: whether or not to use the chat engine, i.e., have persistent chat contexts
             :reset_chat_engine: bool: if a chat engine was previously being used, whether or not to reset its context
             :memory_limit: int: if using a chat engine, memory limit of the chat engine
@@ -193,9 +188,6 @@ AND pid <> pg_backend_pid();"""
             max_new_tokens=self.max_new_tokens
             if max_new_tokens is None
             else max_new_tokens,
-            context_window=self.context_window
-            if context_window is None
-            else context_window,
             use_chat_engine=use_chat_engine,
             chat_engine=self.chat_engine,
             reset_chat_engine=reset_chat_engine,
