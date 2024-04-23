@@ -107,3 +107,19 @@ If only using the CPU, you can do run everything with Docker.
 ```py
 model.setup_db(    host = "postgres",    port = "5432",	user = "postgres",	password = "secret",    db_name = "vector_db",    table_name = "desired_table_name",)
 ```
+
+### Apple silicon
+If you are using Apple silicon, you won't be able to run everything in Docker because of the lack of MPS drivers. You can still use the pgvector image however.
+
+- Install torch with the mps backend enabled with `pip install --pre torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/nightly/cpu`
+- Install the `requirements.txt` file as normal with `pip install -r requirements.txt`, as well as `pip install local_rag_llm`
+- You can check if you successfully installed torch with the MPS backend enabled by running `torch.backends.mps.is_available()` in Python
+- Download the `docker-compose.yml` and `Dockerfile` files
+- Comment out the `environment:` and `volumes:` lines
+- Navigate to the directory you saved the `.yml` file and run `docker compose start postgres`
+- You can now instantiate your LLM with `local_rag_llm.model_setup.instantiate_llm`, passing `n_gpu_layers = 100` or the desired amount
+- The `setup_db()` call in your script should look like:
+
+```py
+model.setup_db(  	host = "localhost",   	port = "5432",	user = "postgres",	password = "secret",   	db_name = "vector_db",  	table_name = "desired_table_name",)
+```
