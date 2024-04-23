@@ -92,3 +92,18 @@ response = model.gen_response(
 response["response"] # the text of the model's response
 
 ```
+
+## Docker usage
+### CPU only
+If only using the CPU, you can do run everything with Docker.
+
+- Download the `docker-compose.yml` and `Dockerfile` files
+- Edit the `HF_TOKEN` to your API token
+- Change the volume mappings to your desired local directories
+- Navigate to the directory you saved the `.yml` file and run `docker compose up`
+- Check the name of the `local_rag_llm` image (not the postgres one) with `docker ps -a`
+- Run your desired script with `docker exec -t <image name from previous step> python /app/script.py`, being sure to use the container's directory structure in the script. The `setup_db()` call in your script should look like:
+
+```py
+model.setup_db(    host = "postgres",    port = "5432",	user = "postgres",	password = "secret",    db_name = "vector_db",    table_name = "desired_table_name",)
+```
