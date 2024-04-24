@@ -11,6 +11,37 @@ import numpy
 from datetime import datetime
 import re
 import io
+import subprocess
+
+
+def pg_dump(
+    host,
+    port,
+    user,
+    password,
+    db_name,
+    filename,
+):
+    "Dump a vector database"
+    command = f'echo "{password}" | pg_dump -U {user} -d {db_name} -f {filename} -h {host} -p {port} > {filename}'
+    process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
+    output, error = process.communicate()
+        
+pg_dump("daniel_hopp", "user1", "password", "db_backup.sql")
+
+
+def pg_restore(
+    host,
+    port,
+    user,
+    password,
+    db_name,
+    filename,
+):
+    "Load a vector database"
+    command = f"""echo "{password}" | psql -U {user} -d postgres -h {host} -p {port} -W -c 'DROP DATABASE IF EXISTS {db_name};' -c 'CREATE DATABASE {db_name} WITH OWNER {user};' && psql {db_name} < {filename}"""
+    process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
+    output, error = process.communicate()
 
 
 def setup_embeddings(embedding_model_id):

@@ -1,5 +1,10 @@
 # Change Log
 
+### 0.0.14
+### Added
+* Added dockerfiles and instructions
+* Added functions to dump and restore vector databases
+
 ### 0.0.13
 ### Fixed
 * `memory_limit` in chat mode would previously overload the context window and stop working, fixed now.

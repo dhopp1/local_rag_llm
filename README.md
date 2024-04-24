@@ -66,10 +66,38 @@ response["response"].print_response_stream() # to generate it the first time
 response["response"].response # to access it after it's been generated
 ```
 
+## Transferring a vector database
+You can transfer a vector database for easy backup and portability.
+
+```python
+from local_rag_llm.db_setup import pg_dump, pg_restore
+
+# save a vector database to file
+pg_dump(
+	host = "<host>" # e.g., "localhost"
+	port = <port>, # e.g., 5432
+	user = "<user>",
+	password = "<password>",
+	db_name = "<name of db to dump",
+	filename = "<filename.sql>",
+)
+
+# restore a vector database
+pg_restore(
+	host = "<host>" # e.g., "localhost"
+	port = <port>, # e.g., 5432
+	user = "<user>",
+	password = "<password>",
+	db_name = "<name of newly restored db",
+	filename = "<filename.sql>",
+)
+```
+
 ## non-RAG example
 A non-RAG model is simpler to set up. The library will infer that the model is non-RAG if you pass nothing for the `text_path` parameter.
 
 ```python
+from local_rag_llm.model_setup import instantiate_llm
 from local_rag_llm import local_llm
 
 # instantiate the LLM
@@ -100,7 +128,7 @@ If only using the CPU or an Nvidia GPU, you can do run everything with Docker.
 - Download the `docker-compose.yml` and `Dockerfile` (for CPU-only) or `Dockerfile-gpu` (for GPU) files
 - Edit the `HF_TOKEN` to your API token
 - Change the volume mappings to your desired local directories
-- Navigate to the directory you saved the `.yml` file and run `docker compose up`. If you don't have a GPU, make the foloiwng edits to the `docker-compose.yml` file: 
+- Navigate to the directory you saved the `.yml` file and run `docker compose up`. If you don't have a GPU, make the following edits to the `docker-compose.yml` file: 
 	- Change `dockerfile: Dockerfile-gpu` line to be `dockerfile: Dockerfile`
 	- Delete the `deploy:` line and everything below it
 - Check the name of the `local_rag_llm` image (not the postgres one) with `docker ps -a`
