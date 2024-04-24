@@ -94,13 +94,15 @@ response["response"] # the text of the model's response
 ```
 
 ## Docker usage
-### CPU only
-If only using the CPU, you can do run everything with Docker.
+### CPU only and CUDA
+If only using the CPU or an Nvidia GPU, you can do run everything with Docker.
 
-- Download the `docker-compose.yml` and `Dockerfile` files
+- Download the `docker-compose.yml` and `Dockerfile` (for CPU-only) or `Dockerfile-gpu` (for GPU) files
 - Edit the `HF_TOKEN` to your API token
 - Change the volume mappings to your desired local directories
-- Navigate to the directory you saved the `.yml` file and run `docker compose up`
+- Navigate to the directory you saved the `.yml` file and run `docker compose up`. If you don't have a GPU, make the foloiwng edits to the `docker-compose.yml` file: 
+	- Change `dockerfile: Dockerfile-gpu` line to be `dockerfile: Dockerfile`
+	- Delete the `deploy:` line and everything below it
 - Check the name of the `local_rag_llm` image (not the postgres one) with `docker ps -a`
 - Run your desired script with `docker exec -t <image name from previous step> python /app/script.py`, being sure to use the container's directory structure in the script. The `setup_db()` call in your script should look like:
 

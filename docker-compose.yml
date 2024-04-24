@@ -11,13 +11,20 @@ services:
       - 5432:5432
   local_rag_llm:
     build:
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile-gpu
     image: local_rag_llm
     environment:
-      HF_TOKEN: <your HF token>
+      HF_TOKEN: <your HF API token>
     depends_on:
       - postgres
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]
+              count: 'all'
     volumes:
       - <your_local_volume>:/app
       - <your_local_volume_with_models>:/app/models
-    tty: true # keep the container running
+    tty: true

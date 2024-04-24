@@ -1,0 +1,13 @@
+FROM nvidia/cuda:12.4.1-devel-ubuntu22.04
+
+WORKDIR /app
+
+# install python
+RUN apt-get update
+RUN apt-get install -y python3-pip python3-dev python-is-python3
+RUN rm -rf /var/lib/apt/lists/*
+
+# install required libraries
+ENV CMAKE_ARGS="-DLLAMA_CUBLAS=ON"
+RUN pip install -r https://raw.githubusercontent.com/dhopp1/local_rag_llm/main/requirements.txt
+RUN pip install local-rag-llm
