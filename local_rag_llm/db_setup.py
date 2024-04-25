@@ -23,7 +23,7 @@ def pg_dump(
     filename,
 ):
     "Dump a vector database"
-    command = f"""pg_dump "postgresql://{user}:{password}@{host}:{port}/{db_name}" > {filename}"""
+    command = f"""pg_dump --no-owner "postgresql://{user}:{password}@{host}:{port}/{db_name}" > {filename}"""
     process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
     output, error = process.communicate()
 
