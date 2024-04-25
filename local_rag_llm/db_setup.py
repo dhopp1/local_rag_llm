@@ -26,8 +26,6 @@ def pg_dump(
     command = f'echo "{password}" | pg_dump -U {user} -d {db_name} -f {filename} -h {host} -p {port} > {filename}'
     process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
     output, error = process.communicate()
-        
-pg_dump("daniel_hopp", "user1", "password", "db_backup.sql")
 
 
 def pg_restore(

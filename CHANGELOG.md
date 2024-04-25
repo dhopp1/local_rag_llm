@@ -1,4 +1,7 @@
 # Change Log
+### 0.0.15
+### Fixed
+* Bug fix in `pgdump`
 
 ### 0.0.14
 ### Added
