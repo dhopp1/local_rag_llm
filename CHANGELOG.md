@@ -1,4 +1,8 @@
 # Change Log
+### 0.0.16
+### Fixed
+* Bug fix in `pg_dump` and `pg_restore` functions
+
 ### 0.0.15
 ### Fixed
 * Bug fix in `pgdump`
