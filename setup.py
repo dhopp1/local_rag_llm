@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="local_rag_llm",
-    version="0.0.16",
+    version="0.0.17",
     author="Daniel Hopp",
     author_email="daniel.hopp@un.org",
     description="Create and run a local LLM with RAG",

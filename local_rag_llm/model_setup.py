@@ -121,13 +121,22 @@ def gen_response(
     chat_engine=None,
     reset_chat_engine=False,
     text_path=None,
-    system_prompt="You are a chatbot.",
+    system_prompt="",
+    context_prompt=None,
     memory_limit=2048,
     streaming=False,
+    chat_mode="context",
 ):
     "generate a response from the LLM"
+    if context_prompt == None:
+        if chat_mode == "context":
+            context_prompt = "Context information is below.\n--------------------\n{context_str}\n--------------------\n"
+        elif chat_mode == "condense_plus_context":
+            context_prompt = '\n  The following is a friendly conversation between a user and an AI assistant.\n  The assistant is talkative and provides lots of specific details from its context.\n  If the assistant does not know the answer to a question, it truthfully says it\n  does not know.\n\n  Here are the relevant documents for the context:\n\n  {context_str}\n\n  Instruction: Based on the above documents, provide a detailed answer for the user question below.\n  Answer "don\'t know" if not present in the document.\n  '
+    if text_path is None:
+        context_prompt = ""
+
     # reset chat engine if required
-    chat_query = "chat"
     if use_chat_engine and reset_chat_engine:
         if chat_engine is not None:
             chat_engine.reset()
@@ -144,69 +153,48 @@ def gen_response(
     )
 
     # use chat engine
-    if use_chat_engine:
-        if chat_engine is None:
-            memory = ChatMemoryBuffer.from_defaults(token_limit=memory_limit)
-        else:
-            memory = ChatMemoryBuffer.from_defaults(chat_history=chat_engine.chat_history, token_limit=memory_limit)
-        # non-RAG
-        if text_path is None:
-            index = VectorStoreIndex.from_documents(
-                [Document(text=" ", metadata={})], embed_model=embed_model
-            )
-            chat_engine = index.as_chat_engine(
-                verbose=True,
-                llm=llm,
-                chat_mode="context",
-                system_prompt=system_prompt,
-                memory=memory,
-                streaming=streaming,
-            )
-        # RAG
-        else:
-            index = VectorStoreIndex.from_vector_store(
-                vector_store, embed_model=embed_model
-            )
-            chat_engine = index.as_chat_engine(
-                verbose=True,
-                llm=llm,
-                chat_mode="context",
-                system_prompt=system_prompt,
-                similarity_top_k=similarity_top_k,
-                streaming=streaming,
-            )
+    if chat_engine is None or not (use_chat_engine):
+        memory = ChatMemoryBuffer.from_defaults(
+            chat_history=[], token_limit=memory_limit
+        )
     else:
-        # non-RAG
-        if text_path is None:
-            index = VectorStoreIndex.from_documents(
-                [Document(text=" ", metadata={})], embed_model=embed_model
-            )
-            chat_engine = index.as_chat_engine(
-                verbose=True,
-                llm=llm,
-                chat_mode="context",
-                system_prompt=system_prompt,
-                streaming=streaming,
-            )
-        # RAG
-        else:
-            retriever = VectorDBRetriever(
-                vector_store,
-                embed_model,
-                query_mode=query_mode,
-                similarity_top_k=similarity_top_k,
-            )
-            chat_engine = RetrieverQueryEngine.from_args(retriever, llm=llm)
-            chat_query = "query"
+        memory = ChatMemoryBuffer.from_defaults(
+            chat_history=chat_engine.chat_history, token_limit=memory_limit
+        )
+
+    kwargs = {
+        "verbose": True,
+        "llm": llm,
+        "chat_mode": chat_mode,
+        "memory": memory,
+        "system_prompt": system_prompt,
+        "similarity_top_k": similarity_top_k,
+        "streaming": streaming,
+    }
+    if chat_mode == "condense_plus_context":
+        kwargs["context_prompt"] = context_prompt
+
+    # non-RAG
+    if text_path is None:
+        index = VectorStoreIndex.from_documents(
+            [Document(text=" ", metadata={})], embed_model=embed_model
+        )
+    else:
+        index = VectorStoreIndex.from_vector_store(
+            vector_store, embed_model=embed_model
+        )
+
+    # create chat engine
+    chat_engine = index.as_chat_engine(**kwargs)
+
+    if chat_mode == "context" or text_path is None:
+        chat_engine._context_template = context_prompt
 
     # prompt response
-    if chat_query == "chat":
-        if streaming:
-            response = chat_engine.stream_chat(prompt)
-        else:
-            response = chat_engine.chat(prompt)
-    elif chat_query == "query":
-        response = chat_engine.query(prompt)
+    if streaming:
+        response = chat_engine.stream_chat(prompt)
+    else:
+        response = chat_engine.chat(prompt)
     final_response = {}
 
     if streaming:
