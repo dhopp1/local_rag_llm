@@ -1,8 +1,12 @@
 # Change Log
-### 0.0.17
+### 0.0.18
 ### Added
 * Added `condense_plus_context` option for chat mode in `gen_response`, which is better at answering follow-up questions with RAG.
 * Added ability to tweak `context_prompt` in `gen_response`
+
+### 0.0.17
+### Fixed
+* Fixed issue with roles in `pg_dump` and `pg_restore`
 
 ### 0.0.16
 ### Fixed
