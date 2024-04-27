@@ -55,7 +55,8 @@ response = model.gen_response(
 	llm = llm,
 	similarity_top_k = 4, # number of documents/chunks to return/query alongside the prompt
 	use_chat_engine = True, # whether or not to use the chat engine, i.e., have a short-term memory of your chat history
-	reset_chat_engine = False # if using a chat engine, whether or not to reset its memory
+	reset_chat_engine = False, # if using a chat engine, whether or not to reset its memory
+	chat_mode = "context" # "context" for first searching the vector db with the user's query, putting that information in the context prompt format, then answering based on that and the user's chat history. "condense_plus_context" for condensing the conversation and last user query into a question, searching the vector db with that, then pass the context plus that query to the LLM. If you plan on having follow-up questions query the vector db, "condense_plus_context" is recommended
 )
 
 response["response"] # the text response of the model

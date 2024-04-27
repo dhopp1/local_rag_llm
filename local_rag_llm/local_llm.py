@@ -160,7 +160,9 @@ AND pid <> pg_backend_pid();"""
         reset_chat_engine=False,
         memory_limit=None,
         system_prompt=None,
+        context_prompt=None,
         streaming=False,
+        chat_mode="context",
     ):
         """Generate a response to a prompt
         parameters:
@@ -173,7 +175,9 @@ AND pid <> pg_backend_pid();"""
             :reset_chat_engine: bool: if a chat engine was previously being used, whether or not to reset its context
             :memory_limit: int: if using a chat engine, memory limit of the chat engine
             :system_prompt: str: prompt for initialization of the chatbot
+            :context_prompt: str: contextual prompt for the RAG information. In format like, "answer the user's question using this context: {context_str}"
             :streaming: bool: whether or not to produce a streamed chat response
+            :chat_mode: str: "context" for first searching the vector db with the user's query, putting that information in the context prompt format, then answering based on that and the user's chat history. "condense_plus_context" for condensing the conversation and last user query into a question, searching the vector db with that, then pass the context plus that query to the LLM.
         returns:
             :str | dict: containing the LLM's response and the supporting k documents and their metadata if RAG is used. Any dates in the metadata are returned as year-float (e.g. 2020-01-13 = 2020.036), prompts should take use this format too, e.g., summarize documents before June 2020 should be said summarize documents less than 2020.5
         """
@@ -195,8 +199,10 @@ AND pid <> pg_backend_pid();"""
             system_prompt=self.system_prompt
             if system_prompt is None
             else system_prompt,
+            context_prompt=context_prompt,
             memory_limit=self.memory_limit if memory_limit is None else memory_limit,
             streaming=streaming,
+            chat_mode=chat_mode,
         )
 
         self.chat_engine = response["chat_engine"]
