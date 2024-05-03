@@ -1,4 +1,8 @@
 # Change Log
+### 0.0.19
+### Fixed
+* Fixed problem with context prompt for non-RAG models
+
 ### 0.0.18
 ### Added
 * Added `condense_plus_context` option for chat mode in `gen_response`, which is better at answering follow-up questions with RAG.

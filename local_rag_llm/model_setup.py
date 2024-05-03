@@ -155,11 +155,11 @@ def gen_response(
     # use chat engine
     if chat_engine is None or not (use_chat_engine):
         memory = ChatMemoryBuffer.from_defaults(
-            chat_history=[], token_limit=memory_limit
+            chat_history=[], #token_limit=memory_limit
         )
     else:
         memory = ChatMemoryBuffer.from_defaults(
-            chat_history=chat_engine.chat_history, token_limit=memory_limit
+            chat_history=chat_engine.chat_history, #token_limit=memory_limit
         )
 
     kwargs = {
@@ -189,6 +189,7 @@ def gen_response(
 
     if chat_mode == "context" or text_path is None:
         chat_engine._context_template = context_prompt
+        chat_engine._context_prompt_template = context_prompt
 
     # prompt response
     if streaming:
