@@ -155,11 +155,11 @@ def gen_response(
     # use chat engine
     if chat_engine is None or not (use_chat_engine):
         memory = ChatMemoryBuffer.from_defaults(
-            chat_history=[], #token_limit=memory_limit
+            chat_history=[], token_limit=memory_limit
         )
     else:
         memory = ChatMemoryBuffer.from_defaults(
-            chat_history=chat_engine.chat_history, #token_limit=memory_limit
+            chat_history=chat_engine.chat_history, token_limit=memory_limit
         )
 
     kwargs = {

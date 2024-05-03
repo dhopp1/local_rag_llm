@@ -1,4 +1,8 @@
 # Change Log
+### 0.0.20
+### Fixed
+* Fixed bug with memory limit
+
 ### 0.0.19
 ### Fixed
 * Fixed problem with context prompt for non-RAG models
