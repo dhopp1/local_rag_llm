@@ -27,7 +27,7 @@ llm = instantiate_llm(    llm_url = "https://huggingface.co/TheBloke/Llama-2-7B
 	context_window = 3900, # working memory of the model in tokens, model-dependent)
 
 # instantiate the model
-model = local_llm.local_llm(
+model = local_llm(
 	text_path = text_path, # either a directory where your .txt files are stored, or a list of absolute paths to the .txt files 
 	metadata_path = "metadata.csv", # optional in case your .txt files have more metadata about them
 	hf_token = None, # hugging face API token. If "HF_AUTH" is in your environment, you don't need to pass	temperature = 0.0, # 0-1, 0 = more conservative, 1 = more random/creative	max_new_tokens = 512, # length of new responses, equal to words more or less

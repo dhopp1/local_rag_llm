@@ -163,6 +163,7 @@ AND pid <> pg_backend_pid();"""
         context_prompt=None,
         streaming=False,
         chat_mode="context",
+        chat_history=[],
     ):
         """Generate a response to a prompt
         parameters:
@@ -178,6 +179,7 @@ AND pid <> pg_backend_pid();"""
             :context_prompt: str: contextual prompt for the RAG information. In format like, "answer the user's question using this context: {context_str}"
             :streaming: bool: whether or not to produce a streamed chat response
             :chat_mode: str: "context" for first searching the vector db with the user's query, putting that information in the context prompt format, then answering based on that and the user's chat history. "condense_plus_context" for condensing the conversation and last user query into a question, searching the vector db with that, then pass the context plus that query to the LLM.
+            :chat_history: [llama_index.core.base.llms.types.ChatMessage]: list of chat history exchanges if passing your own
         returns:
             :str | dict: containing the LLM's response and the supporting k documents and their metadata if RAG is used. Any dates in the metadata are returned as year-float (e.g. 2020-01-13 = 2020.036), prompts should take use this format too, e.g., summarize documents before June 2020 should be said summarize documents less than 2020.5
         """

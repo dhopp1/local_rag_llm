@@ -126,6 +126,7 @@ def gen_response(
     memory_limit=2048,
     streaming=False,
     chat_mode="context",
+    chat_history=[],
 ):
     "generate a response from the LLM"
     if context_prompt == None:
@@ -158,8 +159,10 @@ def gen_response(
             chat_history=[], token_limit=memory_limit
         )
     else:
+        if chat_history == []:
+            chat_history = chat_engine.chat_history
         memory = ChatMemoryBuffer.from_defaults(
-            chat_history=chat_engine.chat_history, token_limit=memory_limit
+            chat_history=chat_history, token_limit=memory_limit
         )
 
     kwargs = {
