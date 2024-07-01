@@ -1,4 +1,9 @@
 # Change Log
+### 0.0.21
+### Added
+* Enabled `chat_history` to be passed to `gen_response` function.
+* Added FastAPI support
+
 ### 0.0.20
 ### Fixed
 * Fixed bug with memory limit

@@ -154,3 +154,21 @@ If you are using Apple silicon, you won't be able to run everything in Docker be
 ```py
 model.setup_db(  	host = "localhost",   	port = "5432",	user = "postgres",	password = "secret",   	db_name = "vector_db",  	table_name = "desired_table_name",)
 ```
+
+## API
+You can host the LLM as an API using the documents in the `api/` folder. You cannot create new RAG corpora via the API, create and vectorize those in the backend. To host the API, update the following three files:
+
+- `db_settings.csv`: CSV with postgres and HuggingFace parameters.
+- `corpora_list.csv`: CSV containing the names of the corpora, the name of the corpus's table in postgres (should be the same as the name), and the directory of the txt files comprising the corpus.
+- `llm_list.csv`: CSV containing the names of the LLMs, the size of their context windows, and the local path to the GGUF file
+
+Make sure [FastAPI](https://fastapi.tiangolo.com/) is installed with `pip install fastapi`. Navigate to the `api/` directory and serve the API with `fastapi dev api.py`
+
+### Usage
+- get the names of available corpora: `http://localhost:8000/api/v1/which_corpora/`
+- get the names of available LLMs: `http://localhost:8000/api/v1/which_llms/`
+- send a query request: `http://localhost:8000/api/v1/query/?prompt=<my prompt>&which_corpus=<desired corpus name>`
+
+The response will be a dictionary with `response` bearing the LLM's response, including the response's text as well as retrieved chunks, if applicable, and `chat_history` bearing the chat history, in case you want to feed it back to the LLM.
+
+The API supports any of the hyperparameters found in the `model.gen_response` function. For example, if we wanted to specify `similarity_top_k` in our call, we would write `http://localhost:8000/api/v1/query/?prompt=<my prompt>&which_corpus=<desired corpus name>&similarity_top_k=6`
