@@ -97,5 +97,3 @@ async def gen_response(
     del llm
     gc.collect()
     return {"response": response, "chat_history": model.chat_engine.chat_history}
-
-#example call: http://localhost:8000/api/v1/query/?prompt=what%20is%20the%20GDP%20of%20italy%20in%202010&which_corpus=texts
