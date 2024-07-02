@@ -78,21 +78,24 @@ async def gen_response(
         )
         
     # generating response
-    response = model.gen_response(
-        prompt=prompt,
-        llm=llm,
-        similarity_top_k=similarity_top_k,
-        max_new_tokens=max_new_tokens,
-        temperature=temperature,
-        use_chat_engine=use_chat_engine,
-        memory_limit=int(
-            llm_list.loc[lambda x: x.name == which_llm, "context_window"].values[0] / 2
-        ),
-        system_prompt=system_prompt,
-        context_prompt=context_prompt,
-        chat_mode=chat_mode,
-        chat_history=chat_history,
-    )
+    try:
+        response = model.gen_response(
+            prompt=prompt,
+            llm=llm,
+            similarity_top_k=similarity_top_k,
+            max_new_tokens=max_new_tokens,
+            temperature=temperature,
+            use_chat_engine=use_chat_engine,
+            memory_limit=int(
+                llm_list.loc[lambda x: x.name == which_llm, "context_window"].values[0] / 2
+            ),
+            system_prompt=system_prompt,
+            context_prompt=context_prompt,
+            chat_mode=chat_mode,
+            chat_history=chat_history,
+        )
+    except:
+        response = "There was an error generating the response. Try reducing your top_similarity_k parameter."
 
     del llm
     gc.collect()
